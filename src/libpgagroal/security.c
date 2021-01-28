@@ -3184,9 +3184,9 @@ pgagroal_tls_valid(void)
          goto error;
       }
 
-      if (st.st_uid != geteuid())
+      if (st.st_uid && st.st_uid != geteuid())
       {
-         pgagroal_log_error("TLS certificate file not owned by user: %s", config->tls_cert_file);
+         pgagroal_log_error("TLS certificate file not owned by user or root: %s", config->tls_cert_file);
          goto error;
       }
 
@@ -3204,15 +3204,15 @@ pgagroal_tls_valid(void)
          goto error;
       }
 
-      if (st.st_uid != geteuid())
+      if (st.st_uid && st.st_uid != geteuid())
       {
-         pgagroal_log_error("TLS private key file not owned by user: %s", config->tls_key_file);
+         pgagroal_log_error("TLS private key file not owned by user or root: %s", config->tls_key_file);
          goto error;
       }
 
-      if (st.st_mode & (S_IRWXG | S_IRWXO))
+      if (st.st_mode & (S_IWGRP | S_IXGRP | S_IRWXO))
       {
-         pgagroal_log_error("TLS private key file must have 0600 permissions: %s", config->tls_key_file);
+         pgagroal_log_error("TLS private key file must have at least 0640 permissions: %s", config->tls_key_file);
          goto error;
       }
 
@@ -3232,9 +3232,9 @@ pgagroal_tls_valid(void)
             goto error;
          }
 
-         if (st.st_uid != geteuid())
+         if (st.st_uid && st.st_uid != geteuid())
          {
-            pgagroal_log_error("TLS CA file not owned by user: %s", config->tls_ca_file);
+            pgagroal_log_error("TLS CA file not owned by user or root: %s", config->tls_ca_file);
             goto error;
          }
       }
